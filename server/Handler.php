@@ -2,36 +2,50 @@
 
 include_once __DIR__ . '/../vendor/autoload.php';
 use Ebanx\Benjamin\Models\Configs\Config;
+use Ebanx\Benjamin\Models\Currency;
 
 class Handler
 {
-    private $benjamin_config;
-    private $info;
+    const CREDITCARD = 'creditcard';
+    const BOLETO = 'boleto';
 
-    public function __construct($info)
+    private $fields;
+    private $benjamin_config;
+    private $ebanx;
+
+    public function __construct()
     {
-        $this->info = $info;
+        $this->benjamin_config = new Config([
+            'sandboxIntegrationKey' => '1231000',
+            'isSandbox' => true,
+            'baseCurrency' => Currency::BRL
+        ]);
+
+        $this->ebanx = EBANX($this->benjamin_config);
     }
 
-    public function printInfo(): void {
-        foreach ($this->info as $field) {
-            echo $field . '<br>';
+    public function setFields($fields): bool {
+        if ($this->validateFields($fields)) {
+            $this->fields = $fields;
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public function validateFields(): bool {
-        if (isset($this->info['payment-type'])) {
-            $boleto = $this->info['payment-type'] == 'boleto';
+    private function validateFields($fields): bool {
+        if (isset($fields['payment-type'])) {
+            $isBoleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
             $isValid = true;
 
-            foreach ($this->info as $key => $field) {
-                $isValid = !empty($field);
+            /* For each field in $_POST, check if it's not empty.
+             * If a credit card field is empty, but the payment type is boleto, ignore it
+             */
+            foreach ($fields as $field => $value) {
+                if ($isBoleto && substr($field, 0, 10) == self::CREDITCARD)
+                    continue; // Ignoring credit card fields if it's a boleto payment
 
-                if ($boleto && !$isValid && substr($key, 0, 10) == 'creditcard') {
-                    $isValid = true;
-                }
-
-                if(!$isValid)
+                if (empty($value))
                     return false;
             }
 
@@ -39,5 +53,10 @@ class Handler
         } else {
             return false;
         }
+    }
+
+    public function generatePayment()
+    {
+        echo 'hello';
     }
 }
