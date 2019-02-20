@@ -1,0 +1,5 @@
+{
+    "require": {
+        "ebanx/benjamin": "^1.18"
+    }
+}
