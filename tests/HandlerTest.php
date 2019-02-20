@@ -3,7 +3,7 @@ require_once __DIR__ . '/../server/Handler.php';
 
 class HandlerTest extends \PHPUnit\Framework\TestCase
 {
-    public function testValidateBoletoFields(): void {
+    public function testValidateBoletoFieldsWithCorrectValues(): void {
         $_POST['value'] = 10.50;
         $_POST['name'] = 'Carlos de Oliveira';
         $_POST['document'] = '062.965.419-02';
@@ -20,7 +20,7 @@ class HandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($handler->validateFields());
     }
 
-    public function testValidateBoletoFieldsShouldFail(): void {
+    public function testValidateBoletoFieldsWithEmptyName_ShouldFail(): void {
         $_POST['value'] = 10.50;
         $_POST['name'] = '';
         $_POST['document'] = '062.965.419-02';

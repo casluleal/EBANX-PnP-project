@@ -5,6 +5,9 @@ use Ebanx\Benjamin\Models\Configs\Config;
 
 class Handler
 {
+    const CREDITCARD = 'creditcard';
+    const BOLETO = 'boleto';
+
     private $benjamin_config;
     private $info;
 
@@ -21,17 +24,17 @@ class Handler
 
     public function validateFields(): bool {
         if (isset($this->info['payment-type'])) {
-            $boleto = $this->info['payment-type'] == 'boleto';
+            $isBoleto = $this->info['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
             $isValid = true;
 
-            foreach ($this->info as $key => $field) {
-                $isValid = !empty($field);
+            /* For each field in $_POST, check if it's not empty.
+             * If a credit card field is empty, but the payment type is boleto, ignore it
+             */
+            foreach ($this->info as $field => $value) {
+                if ($isBoleto && substr($field, 0, 10) == self::CREDITCARD)
+                    continue; // Ignoring credit card fields if it's a boleto payment
 
-                if ($boleto && !$isValid && substr($key, 0, 10) == 'creditcard') {
-                    $isValid = true;
-                }
-
-                if(!$isValid)
+                if (empty($value))
                     return false;
             }
 
