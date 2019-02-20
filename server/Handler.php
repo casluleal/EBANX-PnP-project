@@ -1,12 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ana.magnoni
- * Date: 2019-02-20
- * Time: 11:03
- */
+
+include_once __DIR__ . '/../vendor/autoload.php';
+use Ebanx\Benjamin\Models\Configs\Config;
 
 class Handler
 {
+    private $benjamin_config;
 
+    public function __construct() {
+//        $this->benjamin_config = new Config();
+        echo 'Handler instanciado';
+    }
 }
