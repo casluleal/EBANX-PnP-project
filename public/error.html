@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Checkout</title>
+  <style>
+    input[type="text"], input[type="email"] {
+      display: block;
+      margin: 6px;
+    }
+    input[name="payment-type"][value="creditcard"] + div {
+      display: none;
+    }
+    input[name="payment-type"][value="creditcard"]:checked + div {
+      display: block;
+    }
+    button {
+      margin: 6px;
+    }
+    .error {
+      background-color: #ffbcbc;
+      color: #a33b46;
+      font-size: 115%;
+      padding: 1em 1.5em;
+      margin-bottom: 1em;
+      border: 1px solid #a33b46;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="error"><b>Ops!</b> Seu pagamento deu errado, verifique as informações e tente novamente.</div>
+  <form action="http://localhost:3008/payment" method="POST">
+    <fieldset>
+      <legend>Valor (R$)</legend>
+      <input type="text" name="value" placeholder="Ex.: 10.50" />
+    </fieldset>
+
+    <fieldset>
+      <legend>Dados pessoais</legend>
+      <input type="text" name="name" placeholder="Nome" />
+      <input type="text" name="document" placeholder="CPF" />
+      <input type="email" name="email" placeholder="E-mail" />
+      <input type="text" name="phone-number" placeholder="Numero de telefone" />
+    </fieldset>
+
+    <fieldset>
+      <legend>Endereço</legend>
+      <input type="text" name="zipcode" placeholder="CEP" />
+      <input type="text" name="state" placeholder="Estado" />
+      <input type="text" name="city" placeholder="Cidade" />
+      <input type="text" name="street" placeholder="Rua" />
+      <input type="text" name="address-number" placeholder="Número" />
+    </fieldset>
+
+    <fieldset>
+      <legend>Método de pagamento</legend>
+      <input type="radio" name="payment-type" value="boleto" checked/>Boleto
+      <input type="radio" name="payment-type" value="creditcard"/>Cartão de crédito
+      <div>
+        <input type="text" name="creditcard-holder" placeholder="Titular do cartão" />
+        <input type="text" name="creditcard-number" placeholder="Número" />
+        <input type="text" name="creditcard-duedate" placeholder="Validade (Ex.: 12/30)" />
+        <input type="text" name="creditcard-cvv" placeholder="CVV" />
+      </div>
+    </fieldset>
+
+    <button type="submit">
+      Enviar
+    </button>
+  </form>
+</body>
+
+</html>

@@ -54,4 +54,9 @@ class Handler
             return false;
         }
     }
+
+    public function generatePayment()
+    {
+        echo 'hello';
+    }
 }
