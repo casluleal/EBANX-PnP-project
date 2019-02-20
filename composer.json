@@ -1,5 +1,6 @@
 {
     "require": {
-        "ebanx/benjamin": "^1.18"
+        "ebanx/benjamin": "^1.18",
+        "phpunit/phpunit": "^7"
     }
 }
