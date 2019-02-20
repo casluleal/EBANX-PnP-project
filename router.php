@@ -7,8 +7,8 @@
  */
 
 if (preg_match('/payment/', $_SERVER["REQUEST_URI"])) {
-    echo "<p> Request payment </p>";
+
 } else {
-    header("Location: public/index.html");
+    readfile("public/index.html");
 }
 ?>
