@@ -2,35 +2,46 @@
 
 include_once __DIR__ . '/../vendor/autoload.php';
 use Ebanx\Benjamin\Models\Configs\Config;
+use Ebanx\Benjamin\Models\Currency;
 
 class Handler
 {
     const CREDITCARD = 'creditcard';
     const BOLETO = 'boleto';
 
+    private $fields;
     private $benjamin_config;
-    private $info;
+    private $ebanx;
 
-    public function __construct($info)
+    public function __construct()
     {
-        $this->info = $info;
+        $this->benjamin_config = new Config([
+            'sandboxIntegrationKey' => '1231000',
+            'isSandbox' => true,
+            'baseCurrency' => Currency::USD
+        ]);
+
+        $this->ebanx = EBANX($this->benjamin_config);
     }
 
-    public function printInfo(): void {
-        foreach ($this->info as $field) {
-            echo $field . '<br>';
+    public function setFields($fields): bool {
+        if ($this->validateFields($fields)) {
+            $this->fields = $fields;
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public function validateFields(): bool {
-        if (isset($this->info['payment-type'])) {
-            $isBoleto = $this->info['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
+    private function validateFields($fields): bool {
+        if (isset($fields['payment-type'])) {
+            $isBoleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
             $isValid = true;
 
             /* For each field in $_POST, check if it's not empty.
              * If a credit card field is empty, but the payment type is boleto, ignore it
              */
-            foreach ($this->info as $field => $value) {
+            foreach ($fields as $field => $value) {
                 if ($isBoleto && substr($field, 0, 10) == self::CREDITCARD)
                     continue; // Ignoring credit card fields if it's a boleto payment
 
