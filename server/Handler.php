@@ -18,7 +18,7 @@ class Handler
         $this->benjamin_config = new Config([
             'sandboxIntegrationKey' => '1231000',
             'isSandbox' => true,
-            'baseCurrency' => Currency::USD
+            'baseCurrency' => Currency::BRL
         ]);
 
         $this->ebanx = EBANX($this->benjamin_config);
