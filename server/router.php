@@ -1,13 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ana.magnoni
- * Date: 2019-02-20
- * Time: 11:02
- */
+include_once 'server/Handler.php';
 
 if (preg_match('/payment/', $_SERVER["REQUEST_URI"])) {
-
+    new Handler();
 } else {
     readfile("public/index.html");
 }
