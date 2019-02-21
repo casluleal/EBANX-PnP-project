@@ -10,7 +10,7 @@ class HandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($handler->setFields($_POST));
     }
 
-    public function testSetFieldsWithEmptyName_Boleto_ShouldFail(): void {
+    public function testSetFieldsWithEmptyFields_Boleto_ShouldFail(): void {
         $_POST = $this->returnWrongBoletoPaymentFields();
 
         $handler = new Handler();
@@ -30,10 +30,6 @@ class HandlerTest extends \PHPUnit\Framework\TestCase
         $handler = new Handler();
         $this->assertFalse($handler->setFields($_POST));
     }
-
-//    public function testPaymentCreationWithCorrectFields(): void {
-//
-//    }
 
     private function returnCorrectBoletoPaymentFields(): array {
         $arr = array();

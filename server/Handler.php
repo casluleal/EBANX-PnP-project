@@ -31,9 +31,9 @@ class Handler {
     }
 
     public function setFields($fields): bool {
-        $validFields = $this->validateFields($fields);
+        $valid_fields = $this->validateFields($fields);
 
-        if ($validFields) {
+        if ($valid_fields) {
             $this->fields = $fields;
 
             $this->fields['payment-type'] == self::CREDITCARD
@@ -41,26 +41,26 @@ class Handler {
                 : $this->ebanx = EBANX($this->benjamin_config);
         }
 
-        return $validFields;
+        return $valid_fields;
     }
 
     private function validateFields($fields): bool {
         if (isset($fields['payment-type'])) {
-            $isBoleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
-            $isValid = true;
+            $is_boleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
+            $is_valid = true;
 
             /* For each field in $_POST, check if it's not empty.
              * If a credit card field is empty, but the payment type is boleto, ignore it
              */
             foreach ($fields as $field => $value) {
-                if ($isBoleto && substr($field, 0, 10) == self::CREDITCARD)
+                if ($is_boleto && substr($field, 0, 10) == self::CREDITCARD)
                     continue; // Ignoring credit card fields if it's a boleto payment
 
                 if (empty($value))
                     return false;
             }
 
-            return $isValid;
+            return $is_valid;
         } else {
             return false;
         }
