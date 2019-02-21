@@ -3,11 +3,14 @@
 include_once __DIR__ . '/../vendor/autoload.php';
 
 use Ebanx\Benjamin\Models\Address;
+use Ebanx\Benjamin\Models\Card;
 use Ebanx\Benjamin\Models\Configs\Config;
+use Ebanx\Benjamin\Models\Configs\CreditCardConfig;
 use Ebanx\Benjamin\Models\Country;
 use Ebanx\Benjamin\Models\Currency;
 use Ebanx\Benjamin\Models\Payment;
 use Ebanx\Benjamin\Models\Person;
+include __DIR__ . "/RandomStringGenerator.php";
 
 
 class Handler
@@ -27,12 +30,15 @@ class Handler
             'baseCurrency' => Currency::BRL
         ]);
 
-        $this->ebanx = EBANX($this->benjamin_config);
     }
 
     public function setFields($fields): bool {
         if ($this->validateFields($fields)) {
             $this->fields = $fields;
+            if($this->fields['payment-type'] == self::CREDITCARD)
+                $this->ebanx = EBANX($this->benjamin_config, new CreditCardConfig());
+            else
+                $this->ebanx = EBANX($this->benjamin_config);
             return true;
         } else {
             return false;
@@ -63,13 +69,12 @@ class Handler
 
     public function generatePayment()
     {
-        echo (string)$this->ebanx->create($this->returnPaymentInfo());
-
+        var_dump(($this->ebanx->create($this->returnPaymentInfo())));
     }
 
     private function returnPaymentInfo():Payment {
 
-        return new Payment([
+        $pay_parameters = [
             'type' => $this->fields['payment-type'],
             'address' => new Address([
                 'address' => $this->fields['street'],
@@ -82,20 +87,28 @@ class Handler
             ]),
             'amountTotal' => $this->fields['value'],
             'deviceId' => '',
-            'merchantPaymentCode' => '',
-            //'note' => 'Example payment.',
+            'merchantPaymentCode' => RandomStringGenerator::generate(),
             'person' => new Person([
-                'type' => 'business',
-                'birthdate' => '', //new \DateTime('1978-03-29 08:15:51.000000 UTC'),
+                'type' => '',
+                'birthdate' => '',
                 'document' => $this->fields['document'],
                 'email' => $this->fields['email'],
                 'ip' => '',
                 'name' => $this->fields['name'],
                 'phoneNumber' => $this->fields['phone-number']
             ]),
-            //'items' => [],
-            //'responsible' => [],
-            'dueDate' => new \DateTime ('2017-05-20 01:47:31 UTC')
-        ]);
+            'dueDate' => (new DateTime())->modify('+3 days')
+        ];
+
+        if($this->fields['payment-type'] === self::CREDITCARD){
+            $pay_parameters['card'] = new Card([
+                'cvv' => $this->fields['creditcard-cvv'],
+                'dueDate' => \DateTime::createFromFormat('n-Y', $this->fields['creditcard-duedate']),
+                'name' => $this->fields['creditcard-holder'],
+                'number' => $this->fields['creditcard-number'],
+            ]);
+        }
+
+        return new Payment($pay_parameters);
     }
 }
