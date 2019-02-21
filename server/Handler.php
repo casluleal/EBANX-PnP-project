@@ -70,13 +70,15 @@ class Handler {
         $result = $this->generatePayment();
 
         if ($result['status'] == self::SUCCESS) {
-            if ($this->fields['payment-type'] == self::BOLETO) {
-                echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
-            } else if ($this->fields['payment-type'] == self::CREDITCARD) {
-                echo HTMLConstructor::renderSuccessCreditCardPayment();
-            }
+            if ($this->fields['payment-type'] == self::BOLETO)
+                echo HTMLConstructor::renderSuccessBoletoPayment($result);
+            else
+                echo HTMLConstructor::renderSuccessCreditCardPayment($result);
         } else {
-            var_dump($result);
+            if ($this->fields['payment-type'] == self::BOLETO)
+                echo HTMLConstructor::renderErrorBoletoPayment($result);
+            else
+                echo HTMLConstructor::renderErrorCreditCardPayment($result);
         }
     }
 
@@ -117,7 +119,7 @@ class Handler {
             $pay_parameters['card'] = new Card([
                 'cvv' => $this->fields['creditcard-cvv'],
                 'dueDate' => \DateTime::createFromFormat('n-Y', str_replace('/', '-', $this->fields['creditcard-duedate'])),
-                'name' => $this->fields['creditcard-holder'],
+//                'name' => $this->fields['creditcard-holder'],
                 'number' => $this->fields['creditcard-number'],
             ]);
         }
