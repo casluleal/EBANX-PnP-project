@@ -1,8 +1,14 @@
 <?php
 
 include_once __DIR__ . '/../vendor/autoload.php';
+
+use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Configs\Config;
+use Ebanx\Benjamin\Models\Country;
 use Ebanx\Benjamin\Models\Currency;
+use Ebanx\Benjamin\Models\Payment;
+use Ebanx\Benjamin\Models\Person;
+
 
 class Handler
 {
@@ -57,6 +63,39 @@ class Handler
 
     public function generatePayment()
     {
-        echo 'hello';
+        echo (string)$this->ebanx->create($this->returnPaymentInfo());
+
+    }
+
+    private function returnPaymentInfo():Payment {
+
+        return new Payment([
+            'type' => $this->fields['payment-type'],
+            'address' => new Address([
+                'address' => $this->fields['street'],
+                'city' => $this->fields['city'],
+                'country' => Country::BRAZIL,
+                'state' => $this->fields['state'],
+                'streetComplement' => '',
+                'streetNumber' => $this->fields['address-number'],
+                'zipcode' => $this->fields['zipcode']
+            ]),
+            'amountTotal' => $this->fields['value'],
+            'deviceId' => '',
+            'merchantPaymentCode' => '',
+            //'note' => 'Example payment.',
+            'person' => new Person([
+                'type' => 'business',
+                'birthdate' => '', //new \DateTime('1978-03-29 08:15:51.000000 UTC'),
+                'document' => $this->fields['document'],
+                'email' => $this->fields['email'],
+                'ip' => '',
+                'name' => $this->fields['name'],
+                'phoneNumber' => $this->fields['phone-number']
+            ]),
+            //'items' => [],
+            //'responsible' => [],
+            'dueDate' => new \DateTime ('2017-05-20 01:47:31 UTC')
+        ]);
     }
 }
