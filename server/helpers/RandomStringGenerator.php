@@ -1,7 +1,6 @@
 <?php
 
-class RandomStringGenerator
-{
+class RandomStringGenerator {
     public static function generate($length = 15) {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);

@@ -1,8 +1,8 @@
 <?php
 
 include_once __DIR__ . '/../vendor/autoload.php';
-include_once __DIR__ . '/RandomStringGenerator.php';
-include_once __DIR__ . '/HTMLConstructor.php';
+include_once __DIR__ . '/helpers/RandomStringGenerator.php';
+include_once __DIR__ . '/helpers/HTMLConstructor.php';
 
 use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Card;
@@ -13,8 +13,7 @@ use Ebanx\Benjamin\Models\Currency;
 use Ebanx\Benjamin\Models\Payment;
 use Ebanx\Benjamin\Models\Person;
 
-class Handler
-{
+class Handler {
     const CREDITCARD = 'creditcard';
     const BOLETO = 'boleto';
     const SUCCESS = 'SUCCESS';
@@ -23,27 +22,26 @@ class Handler
     private $benjamin_config;
     private $ebanx;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->benjamin_config = new Config([
             'sandboxIntegrationKey' => '1231000',
             'isSandbox' => true,
             'baseCurrency' => Currency::BRL
         ]);
-
     }
 
     public function setFields($fields): bool {
-        if ($this->validateFields($fields)) {
+        $validFields = $this->validateFields($fields);
+
+        if ($validFields) {
             $this->fields = $fields;
-            if($this->fields['payment-type'] == self::CREDITCARD)
-                $this->ebanx = EBANX($this->benjamin_config, new CreditCardConfig());
-            else
-                $this->ebanx = EBANX($this->benjamin_config);
-            return true;
-        } else {
-            return false;
+
+            $this->fields['payment-type'] == self::CREDITCARD
+                ? $this->ebanx = EBANX($this->benjamin_config, new CreditCardConfig())
+                : $this->ebanx = EBANX($this->benjamin_config);
         }
+
+        return $validFields;
     }
 
     private function validateFields($fields): bool {
@@ -86,8 +84,8 @@ class Handler
         return $this->ebanx->create($this->returnPaymentInfo());
     }
 
-    private function returnPaymentInfo():Payment {
-
+    private function returnPaymentInfo(): Payment {
+        // Filling general data (for both Boleto and Credit Card)
         $pay_parameters = [
             'type' => $this->fields['payment-type'],
             'address' => new Address([
@@ -114,6 +112,7 @@ class Handler
             'dueDate' => (new DateTime())->modify('+3 days')
         ];
 
+        // If it's a Credit Card payment, should include corresponding data
         if($this->fields['payment-type'] === self::CREDITCARD){
             $pay_parameters['card'] = new Card([
                 'cvv' => $this->fields['creditcard-cvv'],

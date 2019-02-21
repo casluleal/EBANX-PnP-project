@@ -6,7 +6,7 @@ class HTMLConstructor {
 <div style="background-color: #e4ffbf; color: #52a353; font-size: 115%; padding: 1em 1.5em; margin-bottom: 1em; border: 1px solid #52a353">
     <b>Sucesso!</b> Seu boleto foi gerado.
     <br>
-    <a href="$url">Clique aqui para pagá-lo e efetivar sua compra.</a>
+    <a href="{$url}">Clique aqui para pagá-lo e efetivar sua compra.</a>
 </div>
 HTML;
     }
