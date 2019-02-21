@@ -2,6 +2,7 @@
 
 include_once __DIR__ . '/../vendor/autoload.php';
 include_once __DIR__ . '/RandomStringGenerator.php';
+include_once __DIR__ . '/HTMLConstructor.php';
 
 use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Configs\Config;
@@ -62,10 +63,16 @@ class Handler
         }
     }
 
-    public function generatePayment(): bool {
-        $result = $this->ebanx->create($this->returnPaymentInfo());
+    public function pay() {
+        $result = $this->generatePayment();
 
-        return $result['status'] == 'SUCESS';
+        if ($result['status'] == 'SUCCESS' && $this->fields['payment-type'] == self::BOLETO) {
+            echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
+        }
+    }
+
+    private function generatePayment(): Array {
+        return $this->ebanx->create($this->returnPaymentInfo());
     }
 
     private function returnPaymentInfo():Payment {
