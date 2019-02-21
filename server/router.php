@@ -1,11 +1,11 @@
 <?php
 include_once 'server/Handler.php';
 
-function returnHTMLForm($error = 0) {
-    if ($error == 0) {
+function returnHTMLForm($status = 0) {
+    if ($status == 0) {
         readfile("public/index.html");
-    } else if ($error == 1) {
-        readfile("public/error.html");
+    } else if ($status == 1) {
+        readfile("public/error-form.html");
     }
 }
 
@@ -13,7 +13,7 @@ if (preg_match('/payment/', $_SERVER["REQUEST_URI"])) {
     $handler = new Handler();
 
     if($handler->setFields($_POST)) {
-        $handler->generatePayment();
+        $handler->pay();
     } else {
         returnHTMLForm(1);
     }

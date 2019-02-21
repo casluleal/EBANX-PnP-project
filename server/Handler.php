@@ -1,6 +1,8 @@
 <?php
 
 include_once __DIR__ . '/../vendor/autoload.php';
+include_once __DIR__ . '/RandomStringGenerator.php';
+include_once __DIR__ . '/HTMLConstructor.php';
 
 use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Card;
@@ -67,9 +69,16 @@ class Handler
         }
     }
 
-    public function generatePayment()
-    {
-        var_dump(($this->ebanx->create($this->returnPaymentInfo())));
+    public function pay() {
+        $result = $this->generatePayment();
+
+        if ($result['status'] == 'SUCCESS' && $this->fields['payment-type'] == self::BOLETO) {
+            echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
+        }
+    }
+
+    private function generatePayment(): Array {
+        return $this->ebanx->create($this->returnPaymentInfo());
     }
 
     private function returnPaymentInfo():Payment {
@@ -93,7 +102,7 @@ class Handler
                 'birthdate' => '',
                 'document' => $this->fields['document'],
                 'email' => $this->fields['email'],
-                'ip' => '',
+                'ip' => '127.0.0.1',
                 'name' => $this->fields['name'],
                 'phoneNumber' => $this->fields['phone-number']
             ]),
