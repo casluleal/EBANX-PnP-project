@@ -1,6 +1,7 @@
 <?php
 
 include_once __DIR__ . '/../vendor/autoload.php';
+include_once __DIR__ . '/RandomStringGenerator.php';
 
 use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Configs\Config;
@@ -61,10 +62,10 @@ class Handler
         }
     }
 
-    public function generatePayment()
-    {
-        echo (string)$this->ebanx->create($this->returnPaymentInfo());
+    public function generatePayment(): bool {
+        $result = $this->ebanx->create($this->returnPaymentInfo());
 
+        return $result['status'] == 'SUCESS';
     }
 
     private function returnPaymentInfo():Payment {
@@ -82,20 +83,20 @@ class Handler
             ]),
             'amountTotal' => $this->fields['value'],
             'deviceId' => '',
-            'merchantPaymentCode' => '',
+            'merchantPaymentCode' => RandomStringGenerator::generate(),
             //'note' => 'Example payment.',
             'person' => new Person([
-                'type' => 'business',
+                'type' => '',
                 'birthdate' => '', //new \DateTime('1978-03-29 08:15:51.000000 UTC'),
                 'document' => $this->fields['document'],
                 'email' => $this->fields['email'],
-                'ip' => '',
+                'ip' => '127.0.0.1',
                 'name' => $this->fields['name'],
                 'phoneNumber' => $this->fields['phone-number']
             ]),
-            //'items' => [],
-            //'responsible' => [],
-            'dueDate' => new \DateTime ('2017-05-20 01:47:31 UTC')
+            'items' => [],
+            'responsible' => [],
+            'dueDate' => (new DateTime())->modify('+2 days')
         ]);
     }
 }
