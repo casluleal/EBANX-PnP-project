@@ -12,13 +12,12 @@ use Ebanx\Benjamin\Models\Country;
 use Ebanx\Benjamin\Models\Currency;
 use Ebanx\Benjamin\Models\Payment;
 use Ebanx\Benjamin\Models\Person;
-include __DIR__ . "/RandomStringGenerator.php";
-
 
 class Handler
 {
     const CREDITCARD = 'creditcard';
     const BOLETO = 'boleto';
+    const SUCCESS = 'SUCCESS';
 
     private $fields;
     private $benjamin_config;
@@ -72,8 +71,14 @@ class Handler
     public function pay() {
         $result = $this->generatePayment();
 
-        if ($result['status'] == 'SUCCESS' && $this->fields['payment-type'] == self::BOLETO) {
-            echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
+        if ($result['status'] == self::SUCCESS) {
+            if ($this->fields['payment-type'] == self::BOLETO) {
+                echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
+            } else if ($this->fields['payment-type'] == self::CREDITCARD) {
+                echo HTMLConstructor::renderSuccessCreditCardPayment();
+            }
+        } else {
+            var_dump($result);
         }
     }
 
@@ -112,7 +117,7 @@ class Handler
         if($this->fields['payment-type'] === self::CREDITCARD){
             $pay_parameters['card'] = new Card([
                 'cvv' => $this->fields['creditcard-cvv'],
-                'dueDate' => \DateTime::createFromFormat('n-Y', $this->fields['creditcard-duedate']),
+                'dueDate' => \DateTime::createFromFormat('n-Y', str_replace('/', '-', $this->fields['creditcard-duedate'])),
                 'name' => $this->fields['creditcard-holder'],
                 'number' => $this->fields['creditcard-number'],
             ]);
