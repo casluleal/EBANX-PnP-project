@@ -1,8 +1,8 @@
 <?php
 
 include_once __DIR__ . '/../vendor/autoload.php';
-include_once __DIR__ . '/RandomStringGenerator.php';
-include_once __DIR__ . '/HTMLConstructor.php';
+include_once __DIR__ . '/helpers/RandomStringGenerator.php';
+include_once __DIR__ . '/helpers/HTMLConstructor.php';
 
 use Ebanx\Benjamin\Models\Address;
 use Ebanx\Benjamin\Models\Card;
@@ -13,8 +13,7 @@ use Ebanx\Benjamin\Models\Currency;
 use Ebanx\Benjamin\Models\Payment;
 use Ebanx\Benjamin\Models\Person;
 
-class Handler
-{
+class Handler {
     const CREDITCARD = 'creditcard';
     const BOLETO = 'boleto';
     const SUCCESS = 'SUCCESS';
@@ -23,46 +22,45 @@ class Handler
     private $benjamin_config;
     private $ebanx;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->benjamin_config = new Config([
             'sandboxIntegrationKey' => '1231000',
             'isSandbox' => true,
             'baseCurrency' => Currency::BRL
         ]);
-
     }
 
     public function setFields($fields): bool {
-        if ($this->validateFields($fields)) {
+        $valid_fields = $this->validateFields($fields);
+
+        if ($valid_fields) {
             $this->fields = $fields;
-            if($this->fields['payment-type'] == self::CREDITCARD)
-                $this->ebanx = EBANX($this->benjamin_config, new CreditCardConfig());
-            else
-                $this->ebanx = EBANX($this->benjamin_config);
-            return true;
-        } else {
-            return false;
+
+            $this->fields['payment-type'] == self::CREDITCARD
+                ? $this->ebanx = EBANX($this->benjamin_config, new CreditCardConfig())
+                : $this->ebanx = EBANX($this->benjamin_config);
         }
+
+        return $valid_fields;
     }
 
     private function validateFields($fields): bool {
         if (isset($fields['payment-type'])) {
-            $isBoleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
-            $isValid = true;
+            $is_boleto = $fields['payment-type'] == self::BOLETO; // Check if the payment type is BOLETO
+            $is_valid = true;
 
             /* For each field in $_POST, check if it's not empty.
              * If a credit card field is empty, but the payment type is boleto, ignore it
              */
             foreach ($fields as $field => $value) {
-                if ($isBoleto && substr($field, 0, 10) == self::CREDITCARD)
+                if ($is_boleto && substr($field, 0, 10) == self::CREDITCARD)
                     continue; // Ignoring credit card fields if it's a boleto payment
 
                 if (empty($value))
                     return false;
             }
 
-            return $isValid;
+            return $is_valid;
         } else {
             return false;
         }
@@ -72,13 +70,15 @@ class Handler
         $result = $this->generatePayment();
 
         if ($result['status'] == self::SUCCESS) {
-            if ($this->fields['payment-type'] == self::BOLETO) {
-                echo HTMLConstructor::renderSuccessBoletoPayment($result['payment']['boleto_url']);
-            } else if ($this->fields['payment-type'] == self::CREDITCARD) {
-                echo HTMLConstructor::renderSuccessCreditCardPayment();
-            }
+            if ($this->fields['payment-type'] == self::BOLETO)
+                echo HTMLConstructor::renderSuccessBoletoPayment($result);
+            else
+                echo HTMLConstructor::renderSuccessCreditCardPayment($result);
         } else {
-            var_dump($result);
+            if ($this->fields['payment-type'] == self::BOLETO)
+                echo HTMLConstructor::renderErrorBoletoPayment($result);
+            else
+                echo HTMLConstructor::renderErrorCreditCardPayment($result);
         }
     }
 
@@ -86,8 +86,8 @@ class Handler
         return $this->ebanx->create($this->returnPaymentInfo());
     }
 
-    private function returnPaymentInfo():Payment {
-
+    private function returnPaymentInfo(): Payment {
+        // Filling general data (for both Boleto and Credit Card)
         $pay_parameters = [
             'type' => $this->fields['payment-type'],
             'address' => new Address([
@@ -114,11 +114,12 @@ class Handler
             'dueDate' => (new DateTime())->modify('+3 days')
         ];
 
+        // If it's a Credit Card payment, should include corresponding data
         if($this->fields['payment-type'] === self::CREDITCARD){
             $pay_parameters['card'] = new Card([
                 'cvv' => $this->fields['creditcard-cvv'],
                 'dueDate' => \DateTime::createFromFormat('n-Y', str_replace('/', '-', $this->fields['creditcard-duedate'])),
-                'name' => $this->fields['creditcard-holder'],
+//                'name' => $this->fields['creditcard-holder'],
                 'number' => $this->fields['creditcard-number'],
             ]);
         }
