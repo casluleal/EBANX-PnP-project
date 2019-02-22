@@ -119,7 +119,7 @@ class Handler {
             $pay_parameters['card'] = new Card([
                 'cvv' => $this->fields['creditcard-cvv'],
                 'dueDate' => \DateTime::createFromFormat('n-Y', str_replace('/', '-', $this->fields['creditcard-duedate'])),
-//                'name' => $this->fields['creditcard-holder'],
+                'name' => $this->fields['creditcard-holder'],
                 'number' => $this->fields['creditcard-number'],
             ]);
         }

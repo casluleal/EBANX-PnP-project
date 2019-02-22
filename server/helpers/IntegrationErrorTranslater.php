@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: lucas.silva
- * Date: 2019-02-21
- * Time: 16:20
- */
 
 class IntegrationErrorTranslater {
     public static function translate($status_code): string {
@@ -22,6 +16,8 @@ class IntegrationErrorTranslater {
             return 'você se esqueceu de nos dizer seu nome.';
         else if ($status_code === 'BP-DR-15')
             return 'faltou preencher o seu email.';
+        else if ($status_code === 'BP-DR-75')
+            return 'número do cartão informado é inválido. Confira se não houve um erro de digitação e tente de novo.';
         else
             return 'verifique suas informações e tente novamente.';
     }
